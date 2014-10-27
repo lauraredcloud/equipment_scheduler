@@ -1,0 +1,100 @@
+{% load scheduler_extras %}
+
+<style>
+.checkout{
+  width: 260px;
+  position: absolute; /* Position checkout absolutely RELATIVE to day */
+  margin-left:100px;
+}
+.day{
+  border: 1px solid #DDDDDD;
+  background-color: #EEEEEE;
+  width: 360px;
+  height: 360px;
+  position: relative; /* Position checkout absolutely RELATIVE to day */
+}
+.day_guidelines{
+  height: 360px;
+  float: left;
+  margin-right: 10px;
+  padding-right: 10px;
+  color: #CCCCCC;
+}
+.errorlist{
+  color: #990000;
+}
+.guideline{
+  position: absolute;
+}
+.testing {
+ color: #999999;
+}
+</style>
+
+<h1>{{ item }}</h1>
+
+<p>{{ item.item_desc }}
+
+<h2>Schedule for {{ date|date:"F d, Y" }}</h2>
+<form action="{% url 'scheduler:detail' item.id %}" method="post">
+	{% csrf_token %}
+	{{ date_form }}
+	<input type='submit' name='date_submit' value='Select Date'>
+</form>
+
+<div class='day'>
+<div class='day_guidelines'>
+   <div class='guideline' style='top:0px'>0:00 (midnight)</div>
+   <div class='guideline' style='top:45px'>3:00 (3 AM)</div>
+   <div class='guideline' style='top:90px'>6:00 (6 AM)</div>
+   <div class='guideline' style='top:135px'>9:00 (9 AM)</div> 
+   <div class='guideline' style='top:180px'>12:00 (noon)</div>
+   <div class='guideline' style='top:225px'>15:00 (3 PM)</div>   
+   <div class='guideline' style='top:270px'>18:00 (6 PM)</div>
+   <div class='guideline' style='top:315px'>21:00 (9 PM)</div>
+   <div class='guideline' style='top:360px'>0:00 (midnight)</div>
+</div>
+
+{% if checkouts %}
+	{% for checkout in checkouts %}
+		<div class='checkout' style='background-color:{{ checkout.user.user_color }};border: 1px solid {{ checkout.user.user_color|make_border_color }}; top:{{ checkout|calc_top:360 }}px;height:{{ checkout|calc_height:360 }}px'>
+			{{ checkout.start_time|date:"H:i" }}-{{ checkout.end_time|date:"H:i" }} : {{ checkout.user.user_name }}
+		</div>
+	{% endfor %}
+{% endif %}
+</div>
+
+<h2>Reserve</h2>
+How to reserve:
+
+<p>Pick a USER from list. (Ideally this would be login-system based.)
+
+<p>DATE automatically fills in from the schedule date; you don't have to edit it. (Ideally, you wouldn't see the date, assuming checkouts can't cross multiple dates.)
+
+<p>Fill in TIME in 24-hour time, e.g. 19:00 for 7:00 PM. (Ideally, this would be a nifty jQuery widget.)
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<p>
+<form action="{% url 'scheduler:detail' item.id %}" method="post">
+	{% csrf_token %}
+	{{ reserve_form }}
+	<p><input type='submit' name='co_submit' value='Reserve'>
+</form>
+
+<div class='linkmenu'>
+	<p><a href='/scheduler'>Menu</a>
+</div>
+
+<div class='testing'>
+	<h3>All {{ item }} Checkouts (for Testing)</h3>
+	{% if all_checkouts %}
+		<ul>
+		{% for checkout in all_checkouts %}
+			<li>{{ checkout }}
+		{% endfor %}
+		</ul>
+	{% else %}
+		No checkouts for this item.
+	{% endif %}
+</div>

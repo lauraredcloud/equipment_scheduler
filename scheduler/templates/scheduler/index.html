@@ -1,0 +1,14 @@
+{% if item_type_list %}
+    <ul>
+    {% for item_type in item_type_list %}
+    	<li>{{ item_type.type_name }}</li>
+    	<ul>
+    	{% for item in item_type.item_set.all %}
+        	<li><a href="/scheduler/{{ item.id }}/">{{ item.item_name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No items are available.</p>
+{% endif %}
